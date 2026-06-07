@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, saveLoginSession } from "../service/authService";
+import { login, saveLoginSession } from "../services/authService";
 
 function LoginPage() {
   const [username, setUsername] = useState("");

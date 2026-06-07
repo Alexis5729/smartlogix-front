@@ -1,94 +1,43 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import LoginPage from './pages/Login'
-import { clearLogin, getSaveToken } from './service/authService'
-import ShipmentsPage from './pages/Shipments'
-import OrderPage from './pages/Order'
-import InventoryPage from './pages/Inventory'
-
-
-
-const PRIVATE_ROUTER = [
-  { key: "shipment", label: "shipment", hash: "#/shipment" },
-  { key: "order", label: "order", hash: "#/order" },
-  { key: "inventory", label: "inventory", hash: "#/inventory" }
-]
-
-function getRouterFromHash() {
-  return window.location.hash.replace("#/", "")
-}
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import InventoryPage from "./pages/InventoryPage";
+import OrdersPage from "./pages/OrderPage";
+import ShipmentPage from "./pages/ShipmentsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const [isLogin, setIsLogin] = useState(Boolean(getSaveToken()))
-  const [current, setCurrent] = useState(getRouterFromHash())
-
-  useEffect(() => {
-    function handleHashChange() {
-      setCurrent(getRouterFromHash())
-    }
-    window.addEventListener("hashchange", handleHashChange)
-    handleHashChange()
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange)
-    }
-  }, [])
-
-  function renderPrivate() {
-    if (current === "shipment") {
-      return <ShipmentsPage />
-    }
-
-    if (current === "order") {
-      return <OrderPage />
-    }
-
-    if (current === "inventory") {
-      return <InventoryPage />
-    }
-
-    return <h1>Ruta no encontrada</h1>
-  }
-
-  function handleLoginSucces() {
-    setIsLogin(true)
-  }
-
-  function handleLogout() {
-    clearLogin()
-    setIsLogin(false)
-  }
-
-  if (isLogin) {
-    return (
-      <div>
-        <aside>
-          <div>
-            <div>
-              <h2>Dashboard</h2>
-            </div>
-
-            <nav>
-              {PRIVATE_ROUTER.map((route) => (
-                <a
-                  key={route.key}
-                  href={route.hash}
-                >
-                  <span>{route.label}</span>
-                </a>
-              ))}
-            </nav>
-          </div>
-          
-        </aside>
-
-        <section>
-          {renderPrivate()}
-        </section>
-      </div>
-    )
-  }
-
-  return <LoginPage handleLoginSucces={handleLoginSucces} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }/>
+        <Route path="/inventory"
+          element={
+              <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"]}>
+                <InventoryPage />
+              </ProtectedRoute>
+          }/>
+        <Route path="/orders"
+          element={
+              <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_USER"]}>
+                <OrdersPage />
+              </ProtectedRoute>
+          } />
+        <Route path="/shipments"
+          element={
+              <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"]}>
+                <ShipmentPage />
+              </ProtectedRoute>
+          } />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

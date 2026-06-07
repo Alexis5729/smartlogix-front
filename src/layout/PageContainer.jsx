@@ -1,11 +1,9 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:8080";
-
-export async function login(data) {
-  const response = await axios.post(`${API_URL}/api/auth/login`,
-    data
-  );
-
-  return response.data;
+function PageContainer({ children }) {
+    return (
+        <div className="max-w-[1700px] mx-auto px-6 py-6">
+            {children}
+        </div>
+    );
 }
+
+export default PageContainer;
