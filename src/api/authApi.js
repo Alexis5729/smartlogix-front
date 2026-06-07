@@ -1,12 +1,11 @@
-import { httpRequest } from "./httpClient"
+import axios from "axios";
 
-// El API solo conoce el endpoint y como enviar los datos al backend.
-export function loginRequest({ credential, password }) {
-    return httpRequest("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-            credential,
-            password
-        })
-    })
+const API_URL = "http://localhost:8080";
+
+export async function login(data) {
+  const response = await axios.post(`${API_URL}/api/auth/login`,
+    data
+  );
+
+  return response.data;
 }
