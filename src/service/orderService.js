@@ -1,8 +1,13 @@
-import { getOrdersRequest } from "../api/orderApi"
-import { getRequiredAuthorizationHeader } from "./authService"
+import { getOrders, createOrder, deleteOrder } from "../api/orderApi";
 
-export async function getOrders() {
-    // El service valida sesion antes de pedir datos al backend.
-    const authorizationHeader = getRequiredAuthorizationHeader()
-    return getOrdersRequest(authorizationHeader)
+export async function loadOrderService() {
+    return await getOrders();
+}
+
+export async function saveOrder(orderData) {
+    return await createOrder(orderData);
+}
+
+export async function removeOrder(orderNumber) {
+    return await deleteOrder(orderNumber);
 }

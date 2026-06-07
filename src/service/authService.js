@@ -17,10 +17,12 @@ export async function login({ credential, password }) {
 
 export function saveLoginSession(loginResponse){
     if(!loginResponse?.token){
-        throw new Error("El backend no entrego token")
+        throw new Error("El backend no entregó token")
     }
 
     localStorage.setItem("token", loginResponse.token)
+    localStorage.setItem("role", loginResponse.role)
+    localStorage.setItem("username", loginResponse.username)
 
     localStorage.setItem("user",
         JSON.stringify({

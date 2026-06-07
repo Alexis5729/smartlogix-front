@@ -1,8 +1,13 @@
-import { getShipmentRequest } from "../api/shipmentApi"
-import { getRequiredAuthorizationHeader } from "./authService"
+import { getShipments, createShipment, deleteShipment } from "../api/shipmentApi";
 
-export async function getShipment() {
-    // El service valida sesion antes de pedir datos al backend.
-    const authorizationHeader = getRequiredAuthorizationHeader()
-    return getShipmentRequest(authorizationHeader)
+export async function loadShipmentService() {
+    return await getShipments();
+}
+
+export async function saveShipment(shipmentData) {
+    return await createShipment(shipmentData);
+}
+
+export async function removeShipment(trackingCode) {
+    return await deleteShipment(trackingCode);
 }
