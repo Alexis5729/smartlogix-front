@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import Input from "../components/Input";
-import { login } from "../api/authApi";
+import { login, saveLoginSession } from "../service/authService";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -17,18 +15,12 @@ function LoginPage() {
         credential: username,
         password,
       });
-
       console.log("Respuesta login:", response);
-
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("role", response.role);
-      localStorage.setItem("username", response.username);
-
+      saveLoginSession(response);
       navigate("/dashboard");
-
     } catch (error) {
       console.error(error);
-      alert("Credenciales inválidas");
+      alert(error.message || "Credenciales inválidas");
     }
   }
 
@@ -57,7 +49,8 @@ function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Ingrese su usuario"
-              className="w-full px-4 py-3 rounded-2xl border border-slate-300 outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"/>
+              className="w-full px-4 py-3 rounded-2xl border border-slate-300 outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
+            />
           </div>
 
           <div>
@@ -70,12 +63,14 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Ingrese su contraseña"
-              className="w-full px-4 py-3 rounded-2xl border border-slate-300 outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"/>
+              className="w-full px-4 py-3 rounded-2xl border border-slate-300 outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
+            />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl transition duration-300">
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl transition duration-300"
+          >
             Iniciar sesión
           </button>
 
