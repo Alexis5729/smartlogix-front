@@ -12,4 +12,4 @@ function Input({ label, type = "text", value, onChange, placeholder }) {
   );
 }
 
-export default Input;
+export default Input
