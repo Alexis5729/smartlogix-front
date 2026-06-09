@@ -62,11 +62,14 @@ function OrdersPage() {
   }
 
   const handleDelete = async (orderNumber) => {
+    if (!window.confirm(`¿Eliminar pedido ${orderNumber}?`)) return;
+
     try {
       await removeOrder(orderNumber);
-      loadOrders();
+      await loadOrders();
     } catch (error) {
       console.error(error);
+      setError("No se pudo eliminar el pedido.");
     }
   };
 

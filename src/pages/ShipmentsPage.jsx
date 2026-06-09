@@ -52,11 +52,14 @@ function ShipmentPage() {
   }
 
   const handleDelete = async (trackingCode) => {
+    if (!window.confirm(`¿Eliminar envío ${trackingCode}?`)) return;
+
     try {
       await removeShipment(trackingCode);
       await loadShipments();
     } catch (error) {
       console.error(error);
+      setError("No se pudo eliminar el envío.");
     }
   };
 

@@ -10,3 +10,21 @@ export async function getInventoryItems() {
 
   return response.data;
 }
+
+export async function createInventoryItem(itemData) {
+  const response = await axios.post(
+    `${API_URL}/api/inventory/items`,
+    itemData,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data;
+}
+
+export async function deleteInventoryItem(sku) {
+  await axios.delete(`${API_URL}/api/inventory/items/${sku}`, {
+    headers: getAuthHeaders(),
+  });
+}
