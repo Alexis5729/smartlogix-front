@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getInventoryItemsWithAvailable, saveInventoryItem, removeInventoryItem } from "../services/inventoryService";
+import { getInventoryItemsWithAvailable, saveInventoryItem, editInventoryItem, removeInventoryItem } from "../services/inventoryService";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
 
@@ -9,6 +9,7 @@ function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingSku, setEditingSku] = useState(null);
   const [formData, setFormData] = useState({
     sku: `SKU-${Math.floor(Math.random() * 9000) + 1000}`,
     productName: "Auriculares Hyperx",
@@ -57,10 +58,22 @@ function InventoryPage() {
       setSaving(true);
       setError("");
 
-      await saveInventoryItem(newItem);
+      if (editingSku) {
+        await editInventoryItem(editingSku, {
+          productName: newItem.productName,
+          warehouseCode: newItem.warehouseCode,
+          availableQuantity: newItem.initialQuantity,
+          reservedQuantity: 0,
+          reorderLevel: newItem.reorderLevel,
+        });
+      } else {
+        await saveInventoryItem(newItem);
+      }
 
       const data = await getInventoryItemsWithAvailable();
       setItems(data);
+
+      setEditingSku(null);
 
       setFormData({
         sku: `SKU-${Math.floor(Math.random() * 9000) + 1000}`,
@@ -75,6 +88,18 @@ function InventoryPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleEdit(item) {
+    setEditingSku(item.sku);
+
+    setFormData({
+      sku: item.sku,
+      productName: item.productName,
+      warehouseCode: item.warehouseCode,
+      initialQuantity: String(item.availableQuantity),
+      reorderLevel: String(item.reorderLevel),
+    });
   }
 
   async function handleDelete(sku) {
@@ -178,9 +203,11 @@ function InventoryPage() {
                             <button
                               type="submit"
                               disabled={saving}
-                              className="rounded-xl bg-blue-600 px-6 py-3 text-white font-semibold shadow-md hover:bg-blue-700 transition disabled:opacity-60"
-                            >
-                              {saving ? "Agregando..." : "Agregar inventario"}
+                              className="rounded-xl bg-blue-600 px-6 py-3 text-white font-semibold shadow-md hover:bg-blue-700 transition disabled:opacity-60">
+                              { saving
+                                  ? (editingSku ? "Actualizando..." : "Agregando...")
+                                  : (editingSku ? "Actualizar inventario" : "Agregar inventario")
+                              }
                             </button>
                           </form>
                         </div>
@@ -205,11 +232,19 @@ function InventoryPage() {
                                 <td className="p-4 border-b border-slate-200">{item.reservedQuantity}</td>
                                 <td className="p-4 border-b border-slate-200">{item.availableQuantity - item.reservedQuantity}</td>
                                 <td className="p-4 border-b border-slate-200">
-                                  <button
-                                    onClick={() => handleDelete(item.sku)}
-                                    className="rounded-xl bg-red-500 px-4 py-2 text-white font-semibold hover:bg-red-600 transition">
-                                    Eliminar
-                                  </button>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleEdit(item)}
+                                      className="rounded-xl bg-yellow-500 px-4 py-2 text-white font-semibold hover:bg-yellow-600 transition">
+                                      Editar
+                                    </button>
+
+                                    <button
+                                      onClick={() => handleDelete(item.sku)}
+                                      className="rounded-xl bg-red-500 px-4 py-2 text-white font-semibold hover:bg-red-600 transition">
+                                      Eliminar
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}

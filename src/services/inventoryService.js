@@ -1,4 +1,4 @@
-import { getInventoryItems, createInventoryItem, deleteInventoryItem } from "../api/inventoryApi";
+import { getInventoryItems, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "../api/inventoryApi";
 
 
 export async function getInventoryItemsWithAvailable() {
@@ -12,6 +12,10 @@ export async function getInventoryItemsWithAvailable() {
 
 export async function saveInventoryItem(itemData) {
   return await createInventoryItem(itemData);
+}
+
+export async function editInventoryItem(sku, itemData) {
+  return await updateInventoryItem(sku, itemData);
 }
 
 export async function removeInventoryItem(sku) {

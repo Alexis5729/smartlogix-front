@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { loadOrderService, saveOrder, removeOrder } from "../services/orderService";
+import { loadOrderService, saveOrder, editOrder, removeOrder } from "../services/orderService";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
 import Button from "../components/Button";
@@ -16,6 +16,7 @@ function OrdersPage() {
   const [sku, setSku] = useState("SKU-1001");
   const [quantity, setQuantity] = useState(1);
   const [unitPrice, setUnitPrice] = useState(19990);
+  const [editingOrderNumber, setEditingOrderNumber] = useState(null);
 
   async function loadOrders() {
     try {
@@ -52,12 +53,33 @@ function OrdersPage() {
     };
 
     try {
-      await saveOrder(orderData);
+      if (editingOrderNumber) {
+        await editOrder(editingOrderNumber, orderData);
+      } else {
+        await saveOrder(orderData);
+      }
       await loadOrders();
+      setEditingOrderNumber(null);
       setError("");
     } catch (err) {
       console.error(err);
       setError("No se pudo crear el pedido. Revisa stock, JWT o servicios activos.");
+    }
+  }
+
+  function handleEdit(order) {
+    const firstLine = order.lines?.[0];
+
+    setEditingOrderNumber(order.orderNumber);
+
+    setCustomerName("Cliente Demo");
+    setCustomerEmail("cliente@smartlogix.com");
+    setShippingAddress("Av. Principal 123");
+
+    if (firstLine) {
+      setSku(firstLine.sku);
+      setQuantity(firstLine.quantity);
+      setUnitPrice(firstLine.unitPrice);
     }
   }
 
@@ -81,7 +103,7 @@ function OrdersPage() {
 
                     <div className="bg-white/80 border border-slate-200 rounded-3xl shadow-lg p-8 mb-8">
                       <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                        Crear pedido
+                        {editingOrderNumber ? "Actualizar pedido" : "Crear pedido"}
                       </h2>
 
                       <form onSubmit={handleCreateOrder} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -111,8 +133,8 @@ function OrdersPage() {
                         placeholder="Precio unitario" />
 
                         <div className="mt-2">
-                            <Button type="submit" variant="primary" size="md">
-                                Crear pedido
+                            <Button type="submit" variant="create" size="md">
+                              {editingOrderNumber ? "Actualizar pedido" : "Crear pedido"}
                             </Button>
                         </div>
                       </form>
@@ -146,11 +168,16 @@ function OrdersPage() {
                                 <td className="p-4 border-b border-slate-200 text-slate-700">${order.totalAmount}</td>
                                 <td className="p-4 border-b border-slate-200 text-slate-700">{order.trackingCode || "Sin tracking"}</td>
                                 <td className="p-4 border-b border-slate-200 text-slate-700">{order.createdAt}</td>
-                                <td>
-                                  <Button variant="danger" size="del"
-                                      onClick={() => handleDelete(order.orderNumber)}>
+                                <td className="p-4 border-b border-slate-200">
+                                  <div className="flex gap-2">
+                                    <Button variant="update" size="del" onClick={() => handleEdit(order)}>
+                                      Editar
+                                    </Button>
+
+                                    <Button variant="delete" size="del" onClick={() => handleDelete(order.orderNumber)}>
                                       Eliminar
-                                  </Button>
+                                    </Button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}

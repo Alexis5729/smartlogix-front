@@ -28,3 +28,15 @@ export async function deleteInventoryItem(sku) {
     headers: getAuthHeaders(),
   });
 }
+
+export async function updateInventoryItem(sku, itemData) {
+  const response = await axios.put(
+    `${API_URL}/api/inventory/items/${sku}`,
+    itemData,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data;
+}

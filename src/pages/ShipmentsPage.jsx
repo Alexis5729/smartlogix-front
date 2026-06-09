@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { loadShipmentService, saveShipment, removeShipment } from "../services/shipmentService";
+import { loadShipmentService, saveShipment, editShipment, removeShipment } from "../services/shipmentService";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
 import Button from "../components/Button";
@@ -13,6 +13,7 @@ function ShipmentPage() {
   const [orderNumber, setOrderNumber] = useState("ORD-DEMO-001");
   const [destinationAddress, setDestinationAddress] = useState("Av. Principal 123");
   const [totalUnits, setTotalUnits] = useState(1);
+  const [editingTrackingCode, setEditingTrackingCode] = useState(null);
 
   async function loadShipments() {
     try {
@@ -42,13 +43,25 @@ function ShipmentPage() {
     };
 
     try {
-      await saveShipment(shipmentData);
+      if (editingTrackingCode) {
+        await editShipment(editingTrackingCode, shipmentData);
+      } else {
+        await saveShipment(shipmentData);
+      }
       await loadShipments();
+      setEditingTrackingCode(null);
       setError("");
     } catch (err) {
       console.error(err);
       setError("No se pudo crear el envío. Revisa JWT o servicios activos.");
     }
+  }
+
+  function handleEdit(shipment) {
+    setEditingTrackingCode(shipment.trackingCode);
+    setOrderNumber(shipment.orderNumber);
+    setDestinationAddress(shipment.destinationAddress || "Av. Principal 123");
+    setTotalUnits(shipment.totalUnits || 1);
   }
 
   const handleDelete = async (trackingCode) => {
@@ -94,8 +107,8 @@ function ShipmentPage() {
                         />
 
                         <div className="mt-2">
-                            <Button type="submit" variant="primary" size="md">
-                                Crear pedido
+                            <Button type="submit" variant="create" size="md">
+                                {editingTrackingCode ? "Actualizar envío" : "Crear envío"}
                             </Button>
                         </div>
                       </form>
@@ -134,10 +147,17 @@ function ShipmentPage() {
                                       {shipment.status}</span>
                                 </td>
                                 <td>
-                                  <Button variant="danger" size="del"
-                                     onClick={() => handleDelete(shipment.trackingCode)}>
-                                     Eliminar
-                                  </Button>
+                                  <div className="flex gap-2">
+                                    <Button variant="update" size="del"
+                                      onClick={() => handleEdit(shipment)}>
+                                      Editar
+                                    </Button>
+
+                                    <Button variant="delete" size="del"
+                                      onClick={() => handleDelete(shipment.trackingCode)}>
+                                      Eliminar
+                                    </Button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}

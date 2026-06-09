@@ -76,7 +76,7 @@ function Navbar({
                     <span>{roleLabel}</span>
                 </div>
 
-                <Button variant="danger" size={isService ? "sm" : "pill"} onClick={logout}>
+                <Button variant="delete" size={isService ? "sm" : "pill"} onClick={logout}>
                     Cerrar sesión
                 </Button>
             </div>
