@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { FaBoxes, FaClipboardList, FaTruck } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
+import { FaBoxes, FaClipboardList, FaTruck, FaUsersCog } from "react-icons/fa";
 
 function DashboardPage() {
 
@@ -49,6 +49,19 @@ function DashboardPage() {
                          Consultar y registrar envíos asociados a pedidos.
                      </p>
                    </Link>
+                   )}
+
+                   {role === "ROLE_ADMIN" && (
+                     <Link to="/users" className="group relative overflow-hidden rounded-3xl bg-white/80 border border-slate-200 p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition duration-300">
+                       <div className="absolute -top-10 -right-10 w-30 h-30 bg-cyan-300 rounded-full opacity-15 group-hover:scale-130 transition duration-700"></div>
+                       <FaUsersCog size={40} />
+                       <h2 className="text-3xl font-bold text-slate-900 mb-3">
+                         Usuarios
+                       </h2>
+                       <p className="text-slate-500 text-lg">
+                         Crear usuarios y asignar permisos de acceso.
+                       </p>
+                     </Link>
                    )}
                  </div>
         </PageContainer>
