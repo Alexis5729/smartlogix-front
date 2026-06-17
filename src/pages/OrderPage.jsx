@@ -94,11 +94,12 @@ function OrdersPage() {
   };
 
     return (
-      <div className="min-h-screen bg-[#020617] text-white p-6">
-        <PageContainer>
-          <Navbar title="Pedidos" variant="dashboard" />
+      <div className="min-h-screen bg-slate-950 p-6 text-white">
+          <PageContainer>
+            <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+              <Navbar />
 
-          <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 border border-white/10 shadow-2xl p-8 mt-6">
+              <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-8">
 
             <div className="flex justify-between items-start mb-8">
               <div>
@@ -248,6 +249,7 @@ function OrdersPage() {
               </div>
             )}
           </section>
+          </div>
         </PageContainer>
       </div>
     );

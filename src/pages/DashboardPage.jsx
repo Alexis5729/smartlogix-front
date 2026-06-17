@@ -94,9 +94,10 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-950 p-6 text-white">
       <PageContainer>
-        <Navbar />
+        <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+          <Navbar />
 
-        <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 border border-white/10 shadow-2xl p-8">
+          <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-8">
           <div className="flex justify-between items-start gap-6 mb-8">
             <div>
               <h1 className="text-4xl font-black">Resumen ejecutivo</h1>
@@ -227,6 +228,7 @@ function DashboardPage() {
             </div>
           </Panel>
         </section>
+        </div>
       </PageContainer>
     </div>
   );
