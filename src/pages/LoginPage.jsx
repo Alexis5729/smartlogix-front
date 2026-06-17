@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, saveLoginSession } from "../services/authService";
+import logoLogin from "../assets/logo-login.png";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -24,60 +25,52 @@ function LoginPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-cyan-50 flex items-center justify-center p-6">
-
-      <div className="w-full max-w-md bg-white/80 border border-slate-200 rounded-3xl shadow-2xl p-10">
-
-        <h1 className="text-3xl font-black text-slate-900 mb-2">
-          SmartLogix
-        </h1>
-
-        <p className="text-slate-500 text-lg mb-8">
-          Acceso a la plataforma logística
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Usuario o email
-            </label>
-
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Ingrese su usuario"
-              className="w-full px-4 py-3 rounded-2xl border border-slate-300 outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-            />
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#08142d] via-[#07152f] to-[#020617] text-white flex items-center justify-center p-6">
+        <div className="w-full max-w-lg rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-violet-950 border border-white/10 shadow-2xl p-10">
+          <div className="flex flex-col items-center mb-8">
+            <img src={logoLogin} alt="SmartLogix" className="h-32 w-auto mb-4"/>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Contraseña
-            </label>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-bold text-slate-300 mb-2">
+                Usuario o email
+              </label>
 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Ingrese su contraseña"
-              className="w-full px-4 py-3 rounded-2xl border border-slate-300 outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-            />
-          </div>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ingrese su usuario"
+                className="w-full bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl transition duration-300"
-          >
-            Iniciar sesión
-          </button>
+            <div>
+              <label className="block text-sm font-bold text-slate-300 mb-2">
+                Contraseña
+              </label>
 
-        </form>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ingrese su contraseña"
+                className="w-full bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-indigo-600 px-6 py-3 text-white font-bold shadow-lg hover:bg-indigo-500 transition"
+            >
+              Iniciar sesión
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default LoginPage;

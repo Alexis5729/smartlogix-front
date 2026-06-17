@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { loadOrderService, saveOrder, editOrder, removeOrder } from "../services/orderService";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
-import Button from "../components/Button";
 
 function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -95,101 +93,164 @@ function OrdersPage() {
     }
   };
 
-  return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-100 via-blue-100 to-stone-100">
-          <PageContainer>
-              <div className="min-h-screen bg-gradient-to-br from-rose-100 via-blue-100 to-stone-100 p-6">
-                      <Navbar title="Pedidos" showBack variant="service" />
+    return (
+      <div className="min-h-screen bg-[#020617] text-white p-6">
+        <PageContainer>
+          <Navbar title="Pedidos" variant="dashboard" />
 
-                    <div className="bg-white/80 border border-slate-200 rounded-3xl shadow-lg p-8 mb-8">
-                      <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                        {editingOrderNumber ? "Actualizar pedido" : "Crear pedido"}
-                      </h2>
+          <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 border border-white/10 shadow-2xl p-8 mt-6">
 
-                      <form onSubmit={handleCreateOrder} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder="Nombre cliente" />
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                        value={customerEmail}
-                        onChange={(e) => setCustomerEmail(e.target.value)}
-                        placeholder="Email cliente" />
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                        value={shippingAddress}
-                        onChange={(e) => setShippingAddress(e.target.value)}
-                        placeholder="Dirección envío" />
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                        value={sku}
-                        onChange={(e) => setSku(e.target.value)}
-                        placeholder="SKU" />
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                        type="number" value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        placeholder="Cantidad" />
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                        type="number" value={unitPrice}
-                        onChange={(e) => setUnitPrice(e.target.value)}
-                        placeholder="Precio unitario" />
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h1 className="text-4xl font-black mb-2">Pedidos</h1>
+                <p className="text-slate-300">Creación, seguimiento y trazabilidad de órdenes comerciales.</p>
+              </div>
+            </div>
 
-                        <div className="mt-2">
-                            <Button type="submit" variant="create" size="md">
-                              {editingOrderNumber ? "Actualizar pedido" : "Crear pedido"}
-                            </Button>
-                        </div>
-                      </form>
-                    </div>
+            {error && (
+              <div className="bg-red-950/50 border border-red-500/50 rounded-2xl p-5 mb-6">
+                <p className="text-red-200 font-semibold">{error}</p>
+              </div>
+            )}
 
-                    {loading && <p>Cargando pedidos...</p>}
-                    {error && <p className="text-red-600 font-semibold">{error}</p>}
+            <div className="bg-slate-800/80 border border-white/10 rounded-3xl p-6 mb-8">
+              <h2 className="text-2xl font-black mb-2">
+                {editingOrderNumber ? "Actualizar pedido" : "Crear pedido"}
+              </h2>
+              <p className="text-slate-400 mb-6">
+                Registra una orden y genera automáticamente la solicitud de despacho.
+              </p>
 
-                    {!loading && (
-                      <div className="bg-white/80 border border-slate-200 rounded-3xl shadow-lg p-8 mt-8">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                            Listado de pedidos
-                        </h2>
+              <form onSubmit={handleCreateOrder} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Nombre cliente"
+                />
 
-                        <table className="w-full border-collapse overflow-hidden rounded-2xl">
-                          <thead>
-                            <tr>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Número</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Estado</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Total</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Tracking</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Fecha</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {orders.map((order) => (
-                              <tr key={order.orderNumber}>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{order.orderNumber}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{order.status}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">${order.totalAmount}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{order.trackingCode || "Sin tracking"}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{order.createdAt}</td>
-                                <td className="p-4 border-b border-slate-200">
-                                  <div className="flex gap-2">
-                                    <Button variant="update" size="del" onClick={() => handleEdit(order)}>
-                                      Editar
-                                    </Button>
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="Email cliente"
+                />
 
-                                    <Button variant="delete" size="del" onClick={() => handleDelete(order.orderNumber)}>
-                                      Eliminar
-                                    </Button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-          </PageContainer>
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  value={shippingAddress}
+                  onChange={(e) => setShippingAddress(e.target.value)}
+                  placeholder="Dirección envío"
+                />
+
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value)}
+                  placeholder="SKU"
+                />
+
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="Cantidad"
+                />
+
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  type="number"
+                  value={unitPrice}
+                  onChange={(e) => setUnitPrice(e.target.value)}
+                  placeholder="Precio unitario"
+                />
+
+                <button
+                  type="submit"
+                  className="rounded-xl bg-indigo-600 px-6 py-3 text-white font-bold shadow-lg hover:bg-indigo-500 transition"
+                >
+                  {editingOrderNumber ? "Actualizar pedido" : "Crear pedido"}
+                </button>
+              </form>
+            </div>
+
+            {loading && (
+              <div className="bg-slate-800/80 border border-white/10 rounded-2xl p-5">
+                <p className="text-slate-300 animate-pulse">Cargando pedidos...</p>
+              </div>
+            )}
+
+            {!loading && (
+              <div className="bg-slate-800/80 border border-white/10 rounded-3xl p-6">
+                <h2 className="text-2xl font-black mb-6">Listado de pedidos</h2>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-slate-900/80 text-slate-300 uppercase text-sm">
+                        <th className="p-4 text-left rounded-l-xl">Número</th>
+                        <th className="p-4 text-left">Estado</th>
+                        <th className="p-4 text-left">Total</th>
+                        <th className="p-4 text-left">Tracking</th>
+                        <th className="p-4 text-left">Fecha</th>
+                        <th className="p-4 text-left rounded-r-xl">Acciones</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {orders.map((order) => (
+                        <tr key={order.orderNumber} className="border-b border-white/10 hover:bg-white/5 transition">
+                          <td className="p-4 font-bold">{order.orderNumber}</td>
+
+                          <td className="p-4">
+                            <span className="rounded-full bg-blue-500/20 text-blue-300 px-3 py-1 font-bold">
+                              {order.status}
+                            </span>
+                          </td>
+
+                          <td className="p-4">${order.totalAmount}</td>
+
+                          <td className="p-4">
+                            {order.trackingCode ? (
+                              <span className="rounded-full bg-emerald-500/20 text-emerald-300 px-3 py-1 font-bold">
+                                {order.trackingCode}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">Sin tracking</span>
+                            )}
+                          </td>
+
+                          <td className="p-4 text-slate-300">{order.createdAt}</td>
+
+                          <td className="p-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEdit(order)}
+                                className="rounded-xl bg-amber-500 px-4 py-2 text-white font-bold hover:bg-amber-400 transition"
+                              >
+                                Editar
+                              </button>
+
+                              <button
+                                onClick={() => handleDelete(order.orderNumber)}
+                                className="rounded-xl bg-red-500 px-4 py-2 text-white font-bold hover:bg-red-400 transition"
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </section>
+        </PageContainer>
       </div>
-
-  );
+    );
 }
 
 export default OrdersPage;

@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { loadShipmentService, saveShipment, editShipment, removeShipment } from "../services/shipmentService";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
-import Button from "../components/Button";
 
 function ShipmentPage() {
   const [shipments, setShipments] = useState([]);
@@ -77,98 +75,179 @@ function ShipmentPage() {
   };
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-fuchsia-100 via-indigo-100 to-emerald-100">
-          <PageContainer>
-              <div className="min-h-screen bg-gradient-to-br from-fuchsia-100 via-indigo-100 to-emerald-100 p-6">
-                    <Navbar title="Envíos" showBack variant="service" />
-                    <div className="bg-white/80 border border-slate-200 rounded-3xl shadow-lg p-8 mb-8">
-                      <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                          Crear envío
-                      </h2>
+    <div className="min-h-screen bg-[#020617] text-white p-6">
+      <PageContainer>
 
-                      <form onSubmit={handleCreateShipment} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                          value={orderNumber}
-                          onChange={(e) => setOrderNumber(e.target.value)}
-                          placeholder="Número de pedido"
-                        />
+        <Navbar title="Envíos" variant="dashboard" />
 
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                          value={destinationAddress}
-                          onChange={(e) => setDestinationAddress(e.target.value)}
-                          placeholder="Dirección destino"
-                        />
+        <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 border border-white/10 shadow-2xl p-8 mt-6">
 
-                        <input className="w-full p-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition"
-                          type="number"
-                          value={totalUnits}
-                          onChange={(e) => setTotalUnits(e.target.value)}
-                          placeholder="Total unidades"
-                        />
+          <div className="mb-8">
+            <h1 className="text-4xl font-black mb-2">
+              Envíos
+            </h1>
 
-                        <div className="mt-2">
-                            <Button type="submit" variant="create" size="md">
-                                {editingTrackingCode ? "Actualizar envío" : "Crear envío"}
-                            </Button>
-                        </div>
-                      </form>
-                    </div>
+            <p className="text-slate-300">
+              Gestión logística, seguimiento y trazabilidad de despachos.
+            </p>
+          </div>
 
-                    {loading && <p>Cargando envíos...</p>}
-                    {error && <p className="text-red-600 font-semibold">{error}</p>}
+          {error && (
+            <div className="bg-red-950/50 border border-red-500/50 rounded-2xl p-5 mb-6">
+              <p className="text-red-200 font-semibold">
+                {error}
+              </p>
+            </div>
+          )}
 
-                    {!loading && (
-                      <div className="bg-white/80 border border-slate-200 rounded-3xl shadow-lg p-8">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                            Listado de envíos
-                        </h2>
+          <div className="bg-slate-800/80 border border-white/10 rounded-3xl p-6 mb-8">
 
-                        <table className="w-full border-collapse overflow-hidden rounded-2xl">
-                          <thead>
-                            <tr>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Tracking</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Pedido</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Transportista</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Ruta</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Entrega estimada</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Estado</th>
-                              <th className="p-4 bg-slate-100 text-slate-700 uppercase text-sm tracking-wide text-left border-b border-slate-200">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {shipments.map((shipment) => (
-                              <tr key={shipment.trackingCode} className="hover:bg-slate-50 transition">
-                                <td className="p-4 border-b border-slate-200 text-slate-700 font-bold">{shipment.trackingCode}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{shipment.orderNumber}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{shipment.carrier}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{shipment.routeCode}</td>
-                                <td className="p-4 border-b border-slate-200 text-slate-700">{shipment.estimatedDeliveryDate}</td>
-                                <td><span className="inline-flex px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">
-                                      {shipment.status}</span>
-                                </td>
-                                <td>
-                                  <div className="flex gap-2">
-                                    <Button variant="update" size="del"
-                                      onClick={() => handleEdit(shipment)}>
-                                      Editar
-                                    </Button>
+            <h2 className="text-2xl font-black mb-2">
+              {editingTrackingCode ? "Actualizar envío" : "Crear envío"}
+            </h2>
 
-                                    <Button variant="delete" size="del"
-                                      onClick={() => handleDelete(shipment.trackingCode)}>
-                                      Eliminar
-                                    </Button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-          </PageContainer>
-      </div>
+            <p className="text-slate-400 mb-6">
+              Registra despachos y administra el seguimiento de entregas.
+            </p>
 
+            <form
+              onSubmit={handleCreateShipment}
+              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+            >
+
+              <input
+                className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value)}
+                placeholder="Número de pedido"
+              />
+
+              <input
+                className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                value={destinationAddress}
+                onChange={(e) => setDestinationAddress(e.target.value)}
+                placeholder="Dirección destino"
+              />
+
+              <input
+                className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                type="number"
+                value={totalUnits}
+                onChange={(e) => setTotalUnits(e.target.value)}
+                placeholder="Total unidades"
+              />
+
+              <button
+                type="submit"
+                className="rounded-xl bg-indigo-600 px-6 py-3 text-white font-bold shadow-lg hover:bg-indigo-500 transition"
+              >
+                {editingTrackingCode ? "Actualizar envío" : "Crear envío"}
+              </button>
+
+            </form>
+          </div>
+
+          {loading && (
+            <div className="bg-slate-800/80 border border-white/10 rounded-2xl p-5">
+              <p className="text-slate-300 animate-pulse">
+                Cargando envíos...
+              </p>
+            </div>
+          )}
+
+          {!loading && (
+            <div className="bg-slate-800/80 border border-white/10 rounded-3xl p-6">
+
+              <h2 className="text-2xl font-black mb-6">
+                Listado de envíos
+              </h2>
+
+              <div className="overflow-x-auto">
+
+                <table className="w-full border-collapse">
+
+                  <thead>
+                    <tr className="bg-slate-900/80 text-slate-300 uppercase text-sm">
+                      <th className="p-4 text-left rounded-l-xl">Tracking</th>
+                      <th className="p-4 text-left">Pedido</th>
+                      <th className="p-4 text-left">Transportista</th>
+                      <th className="p-4 text-left">Dirección</th>
+                      <th className="p-4 text-left">Entrega estimada</th>
+                      <th className="p-4 text-left">Estado</th>
+                      <th className="p-4 text-left rounded-r-xl">Acciones</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+
+                    {shipments.map((shipment) => (
+                      <tr
+                        key={shipment.trackingCode}
+                        className="border-b border-white/10 hover:bg-white/5 transition"
+                      >
+
+                        <td className="p-4 font-bold">
+                          {shipment.trackingCode}
+                        </td>
+
+                        <td className="p-4">
+                          {shipment.orderNumber}
+                        </td>
+
+                        <td className="p-4">
+                          {shipment.carrier}
+                        </td>
+
+                        <td className="p-4">
+                          {shipment.destinationAddress}
+                        </td>
+
+                        <td className="p-4">
+                          {shipment.estimatedDeliveryDate}
+                        </td>
+
+                        <td className="p-4">
+                          <span className="rounded-full bg-emerald-500/20 text-emerald-300 px-3 py-1 font-bold">
+                            {shipment.status}
+                          </span>
+                        </td>
+
+                        <td className="p-4">
+                          <div className="flex gap-2">
+
+                            <button
+                              onClick={() => handleEdit(shipment)}
+                              className="rounded-xl bg-amber-500 px-4 py-2 text-white font-bold hover:bg-amber-400 transition"
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(shipment.trackingCode)}
+                              className="rounded-xl bg-red-500 px-4 py-2 text-white font-bold hover:bg-red-400 transition"
+                            >
+                              Eliminar
+                            </button>
+
+                          </div>
+                        </td>
+
+                      </tr>
+                    ))}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+          )}
+
+        </section>
+
+      </PageContainer>
+    </div>
   );
 }
 
