@@ -52,7 +52,7 @@ function Navbar({
   }
 
   return (
-    <header className="overflow-hidden bg-gradient-to-r from-indigo-700 via-indigo-900 to-slate-950 border-b border-white/10">
+    <header className="overflow-hidden bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-800 border-b border-white/10">
       <div className="flex items-center justify-between px-8 py-5">
         <div className="flex items-center gap-3 min-w-[280px] h-14 overflow-hidden">
           <img
