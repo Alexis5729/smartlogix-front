@@ -22,3 +22,21 @@ export async function createInventoryItem(itemData) {
 
   return response.data;
 }
+
+export async function deleteInventoryItem(sku) {
+  await axios.delete(`${API_URL}/api/inventory/items/${sku}`, {
+    headers: getAuthHeaders(),
+  });
+}
+
+export async function updateInventoryItem(sku, itemData) {
+  const response = await axios.put(
+    `${API_URL}/api/inventory/items/${sku}`,
+    itemData,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data;
+}

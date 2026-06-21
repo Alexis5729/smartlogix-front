@@ -19,6 +19,18 @@ export async function createShipment(shipmentData) {
   return response.data;
 }
 
+export async function updateShipment(trackingCode, shipmentData) {
+  const response = await axios.put(
+    `${API_URL}/api/shipments/${trackingCode}`,
+    shipmentData,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return response.data;
+}
+
 export async function deleteShipment(trackingCode) {
   await axios.delete(`${API_URL}/api/shipments/${trackingCode}`, {
     headers: getAuthHeaders(),

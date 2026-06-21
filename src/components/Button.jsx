@@ -1,13 +1,14 @@
 function Button({
     children,
     type = "button",
-    variant = "primary",
+    variant = "create",
     size = "md",
     onClick,
 }) {
     const variants = {
-        primary: "bg-blue-600 hover:bg-blue-700 text-white",
-        danger: "bg-red-500 hover:bg-red-600 text-white",
+        create: "bg-blue-600 hover:bg-blue-700 text-white",
+        update: "bg-yellow-500 hover:bg-red-600 text-white",
+        delete: "bg-red-500 hover:bg-red-600 text-white"
     };
 
     const sizes = {

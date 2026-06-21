@@ -5,6 +5,7 @@ import InventoryPage from "./pages/InventoryPage";
 import OrdersPage from "./pages/OrderPage";
 import ShipmentPage from "./pages/ShipmentsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import UsersPage from "./pages/UsersPage";
 
 function App() {
   return (
@@ -34,6 +35,12 @@ function App() {
               <ProtectedRoute allowedRoles={["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"]}>
                 <ShipmentPage />
               </ProtectedRoute>
+          } />
+        <Route path="/users"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <UsersPage />
+            </ProtectedRoute>
           } />
       </Routes>
     </BrowserRouter>
