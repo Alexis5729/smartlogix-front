@@ -1,16 +1,20 @@
 export function generateSmartRecommendations({ inventory = [], orders = [], shipments = [] }) {
   const recommendations = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   inventory.forEach((item) => {
-    const available = item.availableQuantity - item.reservedQuantity;
+    const available =
+      Number(item.availableQuantity || 0) - Number(item.reservedQuantity || 0);
+    const reorderLevel = Number(item.reorderLevel || 0);
 
-    if (available <= item.reorderLevel) {
+    if (available <= reorderLevel) {
       recommendations.push({
         priority: "Alta",
         type: "Inventario",
         title: `Reponer ${item.sku}`,
         message: `${item.productName} está bajo el nivel de reposición.`,
-        action: `Disponible: ${available} / mínimo sugerido: ${item.reorderLevel}`,
+        action: `Disponible: ${available} / mínimo sugerido: ${reorderLevel}`,
       });
     }
   });
@@ -22,7 +26,7 @@ export function generateSmartRecommendations({ inventory = [], orders = [], ship
         type: "Pedidos",
         title: `Revisar ${order.orderNumber}`,
         message: `El pedido está en estado ${order.status}.`,
-        action: order.reason || "Validar stock o servicio de envíos.",
+        action: order.reason || "Validar stock, inventario o servicio de envíos.",
       });
     }
 
@@ -30,7 +34,7 @@ export function generateSmartRecommendations({ inventory = [], orders = [], ship
       recommendations.push({
         priority: "Media",
         type: "Pedidos",
-        title: `Pedido sin tracking`,
+        title: "Pedido sin tracking",
         message: `${order.orderNumber} aún no tiene seguimiento.`,
         action: "Coordinar despacho o generación de tracking.",
       });
@@ -38,11 +42,29 @@ export function generateSmartRecommendations({ inventory = [], orders = [], ship
   });
 
   shipments.forEach((shipment) => {
-    if (shipment.status === "PLANNED") {
+    const deliveryDate = shipment.estimatedDeliveryDate
+      ? new Date(shipment.estimatedDeliveryDate)
+      : null;
+
+    const isDelayed =
+      deliveryDate &&
+      deliveryDate < today &&
+      shipment.status !== "DELIVERED" &&
+      shipment.status !== "CANCELLED";
+
+    if (isDelayed) {
+      recommendations.push({
+        priority: "Alta",
+        type: "Envíos",
+        title: "Envío atrasado",
+        message: `${shipment.trackingCode} superó su fecha estimada de entrega.`,
+        action: `Entrega estimada: ${shipment.estimatedDeliveryDate}. Revisar transporte.`,
+      });
+    } else if (shipment.status === "PLANNED") {
       recommendations.push({
         priority: "Media",
         type: "Envíos",
-        title: `Despacho pendiente`,
+        title: "Despacho pendiente",
         message: `${shipment.trackingCode} está planificado.`,
         action: "Actualizar estado cuando salga a ruta.",
       });
@@ -59,5 +81,5 @@ export function generateSmartRecommendations({ inventory = [], orders = [], ship
     });
   }
 
-  return recommendations.slice(0, 3);
+  return recommendations.slice(0, 4);
 }
