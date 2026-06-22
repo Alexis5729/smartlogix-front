@@ -1,6 +1,6 @@
 export const TRACKING_ORIGIN = {
-  label: "Duoc UC Sede Puente Alto, Puente Alto, Chile",
-  shortLabel: "Tienda Duoc UC",
+  label: "Bodega Central SmartLogix",
+  shortLabel: "Bodega Central SmartLogix",
   query: "Duoc UC Puente Alto, Chile",
   lat: -33.6117,
   lng: -70.5758,

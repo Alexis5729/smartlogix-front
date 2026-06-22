@@ -59,6 +59,29 @@ function splitDestinationAddress(address) {
   };
 }
 
+function toTitleCase(value) {
+  return (value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function buildShipmentUpdatePayload(shipment, nextStatus) {
+  return {
+    orderNumber: shipment.orderNumber || DEFAULT_ORDER_NUMBER,
+    destinationAddress:
+      shipment.destinationAddress ||
+      composeDestinationAddress(
+        DEFAULT_DESTINATION_STREET,
+        DEFAULT_DESTINATION_COMMUNE
+      ),
+    totalUnits: shipment.totalUnits ?? DEFAULT_TOTAL_UNITS,
+    status: nextStatus,
+  };
+}
+
 function ShipmentPage() {
   const [shipments, setShipments] = useState([]);
   const [error, setError] = useState("");
@@ -75,6 +98,7 @@ function ShipmentPage() {
   const [editingShipmentStatus, setEditingShipmentStatus] = useState(null);
   const [selectedTrackingCode, setSelectedTrackingCode] = useState(null);
   const [trackingOrigin, setTrackingOrigin] = useState(TRACKING_ORIGIN);
+  const [statusUpdatingTrackingCode, setStatusUpdatingTrackingCode] = useState(null);
   const [trackingMapState, setTrackingMapState] = useState({
     loading: false,
     destination: null,
@@ -132,7 +156,6 @@ function ShipmentPage() {
           ...TRACKING_ORIGIN,
           lat: origin.lat,
           lng: origin.lng,
-          label: origin.label,
         });
       } catch (originError) {
         console.error(originError);
@@ -149,6 +172,11 @@ function ShipmentPage() {
   const selectedShipment =
     shipments.find((shipment) => shipment.trackingCode === selectedTrackingCode) ||
     null;
+  const selectedDestinationInfo = splitDestinationAddress(
+    selectedShipment?.destinationAddress
+  );
+  const selectedDestinationBadge =
+    toTitleCase(selectedDestinationInfo.commune) || "Comuna del cliente";
   const selectedShipmentStatus = getShipmentStatusMeta(selectedShipment?.status);
   const selectedShipmentTimeline = buildShipmentTimeline(selectedShipment?.status);
   const routeCoordinates = buildRouteCoordinates(
@@ -156,6 +184,10 @@ function ShipmentPage() {
     trackingMapState.destination
   );
   const trackingProgress = getShipmentProgress(selectedShipment?.status);
+  const canMarkInTransit = selectedShipment?.status === "PLANNED";
+  const canMarkDelivered = selectedShipment?.status === "IN_TRANSIT";
+  const isUpdatingSelectedStatus =
+    statusUpdatingTrackingCode === selectedShipment?.trackingCode;
   const trackingMapLink = trackingMapState.destination
     ? getOpenStreetMapDirectionsUrl(trackingOrigin, trackingMapState.destination)
     : getOpenStreetMapSearchUrl(selectedShipment?.destinationAddress);
@@ -304,6 +336,33 @@ function ShipmentPage() {
     setTotalUnits(DEFAULT_TOTAL_UNITS);
   }
 
+  async function handleShipmentStatusChange(shipment, nextStatus) {
+    if (!shipment?.trackingCode) {
+      return;
+    }
+
+    try {
+      setStatusUpdatingTrackingCode(shipment.trackingCode);
+      setError("");
+
+      await editShipment(
+        shipment.trackingCode,
+        buildShipmentUpdatePayload(shipment, nextStatus)
+      );
+
+      if (editingTrackingCode === shipment.trackingCode) {
+        setEditingShipmentStatus(nextStatus);
+      }
+
+      await loadShipments();
+    } catch (statusError) {
+      console.error(statusError);
+      setError("No se pudo actualizar el estado del envio.");
+    } finally {
+      setStatusUpdatingTrackingCode(null);
+    }
+  }
+
   async function handleDelete(trackingCode) {
     if (!window.confirm(`Eliminar envio ${trackingCode}?`)) return;
 
@@ -330,7 +389,7 @@ function ShipmentPage() {
               <h1 className="text-4xl font-black mb-2">Envios</h1>
 
               <p className="text-slate-300">
-                Gestion logistica, seguimiento y trazabilidad de despachos.
+                Seguimiento visual y trazabilidad de despachos desde la bodega central.
               </p>
             </div>
 
@@ -346,11 +405,11 @@ function ShipmentPage() {
               </h2>
 
               <p className="text-slate-400 mb-3">
-                Registra despachos y administra el seguimiento de entregas.
+                Ruta estimada desde la bodega central hasta el destino.
               </p>
 
               <p className="text-xs text-sky-300 mb-6">
-                Origen fijo del despacho: Duoc UC Sede Puente Alto.
+                Origen fijo del despacho: Bodega Central SmartLogix.
               </p>
 
               <form
@@ -504,13 +563,13 @@ function ShipmentPage() {
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                         <div>
                           <p className="text-sm uppercase tracking-[0.28em] text-sky-300 mb-2">
-                            Tracking activo
+                            Seguimiento visual del envio
                           </p>
                           <h3 className="text-3xl font-black">
                             {selectedShipment.trackingCode}
                           </h3>
                           <p className="text-slate-400 mt-2">
-                            Seguimiento visual del pedido {selectedShipment.orderNumber}.
+                            Mapa, estado actual y alerta por atraso del despacho.
                           </p>
                         </div>
 
@@ -519,6 +578,56 @@ function ShipmentPage() {
                         >
                           {selectedShipmentStatus.label}
                         </span>
+                      </div>
+
+                      <div className="mb-6 flex flex-wrap gap-3 text-sm">
+                        <span className="rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 font-semibold text-sky-100">
+                          Origen: {trackingOrigin.label}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-semibold text-slate-100">
+                          Destino: {selectedDestinationBadge}
+                        </span>
+                        <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 font-semibold text-emerald-100">
+                          Estado: {selectedShipmentStatus.label}
+                        </span>
+                      </div>
+
+                      <div className="mb-6 flex flex-wrap gap-3">
+                        {canMarkInTransit && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleShipmentStatusChange(selectedShipment, "IN_TRANSIT")
+                            }
+                            disabled={isUpdatingSelectedStatus}
+                            className="rounded-xl bg-amber-500 px-4 py-2 font-bold text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isUpdatingSelectedStatus
+                              ? "Actualizando..."
+                              : "Marcar en ruta"}
+                          </button>
+                        )}
+
+                        {canMarkDelivered && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleShipmentStatusChange(selectedShipment, "DELIVERED")
+                            }
+                            disabled={isUpdatingSelectedStatus}
+                            className="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isUpdatingSelectedStatus
+                              ? "Actualizando..."
+                              : "Marcar entregado"}
+                          </button>
+                        )}
+
+                        {selectedShipment?.status === "DELIVERED" && (
+                          <span className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 font-semibold text-emerald-100">
+                            Entrega final registrada.
+                          </span>
+                        )}
                       </div>
 
                       {trackingMapState.error && (
