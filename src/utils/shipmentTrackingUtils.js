@@ -1,8 +1,9 @@
 export const TRACKING_ORIGIN = {
-  label: "Centro Logístico SmartLogix, Santiago, Chile",
-  shortLabel: "Centro logístico",
-  lat: -33.4489,
-  lng: -70.6693,
+  label: "Duoc UC Sede Puente Alto, Puente Alto, Chile",
+  shortLabel: "Tienda Duoc UC",
+  query: "Duoc UC Puente Alto, Chile",
+  lat: -33.6117,
+  lng: -70.5758,
 };
 
 const STATUS_META = {
@@ -11,7 +12,7 @@ const STATUS_META = {
     classes: "bg-sky-500/20 text-sky-200",
   },
   IN_TRANSIT: {
-    label: "En tránsito",
+    label: "En ruta",
     classes: "bg-amber-500/20 text-amber-200",
   },
   DELIVERED: {
@@ -27,18 +28,18 @@ const STATUS_META = {
 const BASE_TIMELINE = [
   {
     key: "PLANNED",
-    label: "Preparación",
-    description: "El despacho fue registrado y quedó listo para planificación.",
+    label: "Preparacion",
+    description: "El despacho fue registrado y quedo listo para planificacion.",
   },
   {
     key: "IN_TRANSIT",
     label: "En ruta",
-    description: "El envío se encuentra avanzando hacia el destino.",
+    description: "El envio se encuentra avanzando hacia el destino.",
   },
   {
     key: "DELIVERED",
     label: "Entrega final",
-    description: "El pedido se entregó correctamente al destinatario.",
+    description: "El pedido se entrego correctamente al destinatario.",
   },
 ];
 
@@ -109,7 +110,7 @@ export function buildShipmentTimeline(status) {
         {
           key: "CANCELLED",
           label: "Incidencia",
-          description: "El envío fue cancelado y requiere revisión manual.",
+          description: "El envio fue cancelado y requiere revision manual.",
         },
       ]
     : BASE_TIMELINE;

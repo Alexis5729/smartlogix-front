@@ -28,7 +28,7 @@ function ShipmentTrackingMap({ origin, destination, routeCoordinates }) {
   if (!destination) {
     return (
       <div className="h-[360px] rounded-3xl border border-dashed border-white/15 bg-slate-950/60 flex items-center justify-center p-6 text-center text-slate-400">
-        No se pudieron ubicar coordenadas válidas para mostrar el mapa del envío.
+        No se pudieron ubicar coordenadas validas para mostrar el mapa del envio.
       </div>
     );
   }

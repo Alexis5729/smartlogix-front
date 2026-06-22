@@ -9,8 +9,52 @@ function getStorage() {
   return window.localStorage;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function hasWord(value, word) {
+  const normalizedWord = word
+    .trim()
+    .split(/\s+/)
+    .map(escapeRegExp)
+    .join("\\s+");
+
+  return new RegExp(`\\b${normalizedWord}\\b`, "i").test(value);
+}
+
 function normalizeAddress(address) {
   return address.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function buildSearchQuery(address, options = {}) {
+  const {
+    defaultCity = "Puente Alto",
+    defaultRegion = "Region Metropolitana",
+    defaultCountry = "Chile",
+  } = options;
+
+  let query = address
+    .trim()
+    .replace(/\bcomuna\b/gi, "")
+    .replace(/\s*,\s*/g, ", ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/,+/g, ",")
+    .replace(/^,\s*|\s*,\s*$/g, "");
+
+  if (defaultCity && !hasWord(query, defaultCity)) {
+    query = `${query}, ${defaultCity}`;
+  }
+
+  if (defaultRegion && !hasWord(query, defaultRegion)) {
+    query = `${query}, ${defaultRegion}`;
+  }
+
+  if (defaultCountry && !hasWord(query, defaultCountry)) {
+    query = `${query}, ${defaultCountry}`;
+  }
+
+  return query;
 }
 
 function readCache(cacheKey) {
@@ -38,20 +82,18 @@ function writeCache(cacheKey, value) {
   try {
     storage.setItem(`${CACHE_PREFIX}${cacheKey}`, JSON.stringify(value));
   } catch {
-    // Si el almacenamiento falla, el geocoding sigue funcionando sin caché.
+    // Si el almacenamiento falla, el geocoding sigue funcionando sin cache.
   }
 }
 
-export async function geocodeAddress(address) {
+export async function geocodeAddress(address, options = {}) {
   const cleanAddress = address?.trim();
 
   if (!cleanAddress) {
     return null;
   }
 
-  const searchQuery = cleanAddress.toLowerCase().includes("chile")
-    ? cleanAddress
-    : `${cleanAddress}, Chile`;
+  const searchQuery = buildSearchQuery(cleanAddress, options);
   const cacheKey = normalizeAddress(searchQuery);
   const cachedLocation = readCache(cacheKey);
 
