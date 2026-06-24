@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  FaBoxes,
-  FaClipboardList,
-  FaTruck,
-  FaUsersCog,
-} from "react-icons/fa";
-
+import {FaBoxes, FaClipboardList, FaTruck, FaUsersCog,} from "react-icons/fa";
+import { getOrderStatusLabel } from "../utils/statusUtils";
 import PageContainer from "../layout/PageContainer";
 import Navbar from "../components/Navbar";
 import { getInventoryItemsWithAvailable } from "../services/inventoryService";
@@ -162,7 +157,7 @@ function DashboardPage() {
                 <div className="space-y-4">
                   {Object.entries(orderStatusCount).map(([status, count]) => (
                     <div key={status} className="flex justify-between border-b border-white/10 pb-3">
-                      <span className="text-slate-300">{status}</span>
+                      <span className="text-slate-300">{getOrderStatusLabel(status)}</span>
                       <strong>{count}</strong>
                     </div>
                   ))}

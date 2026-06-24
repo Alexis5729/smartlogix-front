@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadOrderService, saveOrder, editOrder, removeOrder } from "../services/orderService";
+import { removeShipment } from "../services/shipmentService";
+import { getOrderStatusLabel } from "../utils/statusUtils";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
 
@@ -37,15 +39,62 @@ function OrdersPage() {
   async function handleCreateOrder(event) {
     event.preventDefault();
 
+    const cleanCustomerName = customerName.trim();
+    const cleanCustomerEmail = customerEmail.trim();
+    const cleanShippingAddress = shippingAddress.trim();
+    const cleanSku = sku.trim();
+    const parsedQuantity = Number(quantity);
+    const parsedUnitPrice = Number(unitPrice);
+
+    if (!cleanCustomerName) {
+      setError("Ingresa el nombre del cliente.");
+      return;
+    }
+
+    if (!cleanCustomerEmail) {
+      setError("Ingresa el correo del cliente.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanCustomerEmail)) {
+      setError("Ingresa un correo válido.");
+      return;
+    }
+
+    if (!cleanShippingAddress) {
+      setError("Ingresa la dirección de envío.");
+      return;
+    }
+
+    if (!cleanSku) {
+      setError("Ingresa un SKU válido.");
+      return;
+    }
+
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+      setError("La cantidad debe ser mayor a cero.");
+      return;
+    }
+
+    if (!Number.isInteger(parsedQuantity)) {
+      setError("La cantidad debe ser un número entero.");
+      return;
+    }
+
+    if (!Number.isFinite(parsedUnitPrice) || parsedUnitPrice <= 0) {
+      setError("El precio unitario debe ser mayor a cero.");
+      return;
+    }
+
     const orderData = {
-      customerName,
-      customerEmail,
-      shippingAddress,
+      customerName: cleanCustomerName,
+      customerEmail: cleanCustomerEmail,
+      shippingAddress: cleanShippingAddress,
       lines: [
         {
-          sku,
-          quantity: Number(quantity),
-          unitPrice: Number(unitPrice),
+          sku: cleanSku,
+          quantity: parsedQuantity,
+          unitPrice: parsedUnitPrice,
         },
       ],
     };
@@ -56,12 +105,19 @@ function OrdersPage() {
       } else {
         await saveOrder(orderData);
       }
+
       await loadOrders();
       setEditingOrderNumber(null);
       setError("");
     } catch (err) {
       console.error(err);
-      setError("No se pudo crear el pedido. Revisa stock, JWT o servicios activos.");
+
+      const backendMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "No se pudo crear el pedido. Revisa stock, JWT o servicios activos.";
+
+      setError(backendMessage);
     }
   }
 
@@ -82,11 +138,24 @@ function OrdersPage() {
   }
 
   const handleDelete = async (orderNumber) => {
-    if (!window.confirm(`¿Eliminar pedido ${orderNumber}?`)) return;
+    if (!window.confirm(`¿Eliminar pedido ${orderNumber} y su envío asociado?`)) return;
 
     try {
+      const orderToDelete = orders.find(
+        (order) => order.orderNumber === orderNumber
+      );
+
+      if (orderToDelete?.trackingCode) {
+        try {
+          await removeShipment(orderToDelete.trackingCode);
+        } catch (shipmentError) {
+          console.warn("No se pudo eliminar el envío asociado:", shipmentError);
+        }
+      }
+
       await removeOrder(orderNumber);
       await loadOrders();
+      setError("");
     } catch (error) {
       console.error(error);
       setError("No se pudo eliminar el pedido.");
@@ -154,16 +223,28 @@ function OrdersPage() {
                 <input
                   className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
                   type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  min="1"
+                    step="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    onInvalid={(e) =>
+                      e.target.setCustomValidity("Debe ingresar un número entero mayor a 0.")
+                    }
+                    onInput={(e) => e.target.setCustomValidity("")}
                   placeholder="Cantidad"
                 />
 
                 <input
                   className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
                   type="number"
-                  value={unitPrice}
-                  onChange={(e) => setUnitPrice(e.target.value)}
+                  min="1"
+                    step="1"
+                    value={unitPrice}
+                    onChange={(e) => setUnitPrice(e.target.value)}
+                    onInvalid={(e) =>
+                      e.target.setCustomValidity("Debe ingresar un número entero mayor a 0.")
+                    }
+                    onInput={(e) => e.target.setCustomValidity("")}
                   placeholder="Precio unitario"
                 />
 
@@ -206,7 +287,7 @@ function OrdersPage() {
 
                           <td className="p-4">
                             <span className="rounded-full bg-blue-500/20 text-blue-300 px-3 py-1 font-bold">
-                              {order.status}
+                              {getOrderStatusLabel(order.status)}
                             </span>
                           </td>
 

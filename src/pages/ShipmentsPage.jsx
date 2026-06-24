@@ -3,23 +3,10 @@ import Navbar from "../components/Navbar";
 import ShipmentTrackingMap from "../components/ShipmentTrackingMap";
 import PageContainer from "../layout/PageContainer";
 import { geocodeAddress } from "../services/geocodingService";
-import {
-  editShipment,
-  loadShipmentService,
-  removeShipment,
-  saveShipment,
-} from "../services/shipmentService";
-import {
-  TRACKING_ORIGIN,
-  buildRouteCoordinates,
-  buildShipmentTimeline,
-  formatShipmentDate,
-  getOpenStreetMapDirectionsUrl,
-  getOpenStreetMapSearchUrl,
-  getShipmentProgress,
-  getShipmentStatusMeta,
-  isShipmentDelayed,
-} from "../utils/shipmentTrackingUtils";
+import {editShipment, loadShipmentService, removeShipment, saveShipment,} from "../services/shipmentService";
+import {TRACKING_ORIGIN, buildRouteCoordinates, buildShipmentTimeline, formatShipmentDate, getOpenStreetMapDirectionsUrl,
+  getOpenStreetMapSearchUrl, getShipmentProgress, getShipmentStatusMeta, isShipmentDelayed,} from "../utils/shipmentTrackingUtils";
+import { removeOrder } from "../services/orderService";
 
 const DEFAULT_ORDER_NUMBER = "ORD-DEMO-001";
 const DEFAULT_DESTINATION_STREET = "Musa 2099";
@@ -364,17 +351,32 @@ function ShipmentPage() {
   }
 
   async function handleDelete(trackingCode) {
-    if (!window.confirm(`Eliminar envio ${trackingCode}?`)) return;
+    if (!window.confirm(`Eliminar envío ${trackingCode} y su pedido asociado?`)) return;
 
     try {
+      const shipmentToDelete = shipments.find(
+        (shipment) => shipment.trackingCode === trackingCode
+      );
+
       await removeShipment(trackingCode);
+
+      if (shipmentToDelete?.orderNumber) {
+        try {
+          await removeOrder(shipmentToDelete.orderNumber);
+        } catch (orderError) {
+          console.warn("No se pudo eliminar el pedido asociado:", orderError);
+        }
+      }
+
       if (editingTrackingCode === trackingCode) {
         resetForm();
       }
+
       await loadShipments();
+      setError("");
     } catch (deleteError) {
       console.error(deleteError);
-      setError("No se pudo eliminar el envio.");
+      setError("No se pudo eliminar el envío.");
     }
   }
 
@@ -386,7 +388,7 @@ function ShipmentPage() {
 
           <section className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-8">
             <div className="mb-8">
-              <h1 className="text-4xl font-black mb-2">Envios</h1>
+              <h1 className="text-4xl font-black mb-2">Envíos</h1>
 
               <p className="text-slate-300">
                 Seguimiento visual y trazabilidad de despachos desde la bodega central.
@@ -467,13 +469,13 @@ function ShipmentPage() {
 
             {loading && (
               <div className="bg-slate-800/80 border border-white/10 rounded-2xl p-5">
-                <p className="text-slate-300 animate-pulse">Cargando envios...</p>
+                <p className="text-slate-300 animate-pulse">Cargando envíos...</p>
               </div>
             )}
 
             {!loading && (
               <div className="bg-slate-800/80 border border-white/10 rounded-3xl p-6">
-                <h2 className="text-2xl font-black mb-6">Listado de envios</h2>
+                <h2 className="text-2xl font-black mb-6">Listado de envíos</h2>
 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
@@ -482,7 +484,7 @@ function ShipmentPage() {
                         <th className="p-4 text-left rounded-l-xl">Tracking</th>
                         <th className="p-4 text-left">Pedido</th>
                         <th className="p-4 text-left">Transportista</th>
-                        <th className="p-4 text-left">Direccion</th>
+                        <th className="p-4 text-left">Dirección</th>
                         <th className="p-4 text-left">Entrega estimada</th>
                         <th className="p-4 text-left">Estado</th>
                         <th className="p-4 text-left rounded-r-xl">Acciones</th>
@@ -563,7 +565,7 @@ function ShipmentPage() {
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                         <div>
                           <p className="text-sm uppercase tracking-[0.28em] text-sky-300 mb-2">
-                            Seguimiento visual del envio
+                            Seguimiento visual del envío
                           </p>
                           <h3 className="text-3xl font-black">
                             {selectedShipment.trackingCode}
@@ -673,7 +675,7 @@ function ShipmentPage() {
                       <section className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
                         <div className="flex items-center justify-between gap-4 mb-5">
                           <div>
-                            <h3 className="text-2xl font-black">Resumen del envio</h3>
+                            <h3 className="text-2xl font-black">Resumen del envío</h3>
                             <p className="text-slate-400 mt-1">
                               Estado operativo y avance estimado.
                             </p>

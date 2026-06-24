@@ -45,28 +45,77 @@ function InventoryPage() {
   async function handleCreateInventory(event) {
     event.preventDefault();
 
-    const newItem = {
-      sku: formData.sku,
-      productName: formData.productName,
-      warehouseCode: formData.warehouseCode,
-      initialQuantity: Number(formData.initialQuantity),
-      reorderLevel: Number(formData.reorderLevel),
-    };
+    const cleanSku = formData.sku.trim();
+    const cleanProductName = formData.productName.trim();
+    const cleanWarehouseCode = formData.warehouseCode.trim();
+    const parsedQuantity = Number(formData.initialQuantity);
+    const parsedReorderLevel = Number(formData.reorderLevel);
+
+    if (!cleanSku) {
+      setError("Ingresa un SKU válido.");
+      return;
+    }
+
+    if (!cleanProductName) {
+      setError("Ingresa el nombre del producto.");
+      return;
+    }
+
+    if (!cleanWarehouseCode) {
+      setError("Ingresa el código de bodega.");
+      return;
+    }
+
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity < 0) {
+      setError("La cantidad no puede ser negativa.");
+      return;
+    }
+
+    if (!Number.isInteger(parsedQuantity)) {
+      setError("La cantidad debe ser un número entero.");
+      return;
+    }
+
+    if (!Number.isFinite(parsedReorderLevel) || parsedReorderLevel < 0) {
+      setError("El nivel de reposición no puede ser negativo.");
+      return;
+    }
+
+    if (!Number.isInteger(parsedReorderLevel)) {
+      setError("El nivel de reposición debe ser un número entero.");
+      return;
+    }
 
     try {
       setSaving(true);
       setError("");
 
       if (editingSku) {
+        const currentItem = items.find((item) => item.sku === editingSku);
+        const reservedQuantity = Number(currentItem?.reservedQuantity || 0);
+
+        if (parsedQuantity < reservedQuantity) {
+          setError(
+            `No puedes dejar el stock en ${parsedQuantity}, porque ya existen ${reservedQuantity} unidades reservadas.`
+          );
+          return;
+        }
+
         await editInventoryItem(editingSku, {
-          productName: newItem.productName,
-          warehouseCode: newItem.warehouseCode,
-          availableQuantity: newItem.initialQuantity,
-          reservedQuantity: 0,
-          reorderLevel: newItem.reorderLevel,
+          productName: cleanProductName,
+          warehouseCode: cleanWarehouseCode,
+          availableQuantity: parsedQuantity,
+          reservedQuantity,
+          reorderLevel: parsedReorderLevel,
         });
       } else {
-        await saveInventoryItem(newItem);
+        await saveInventoryItem({
+          sku: cleanSku,
+          productName: cleanProductName,
+          warehouseCode: cleanWarehouseCode,
+          initialQuantity: parsedQuantity,
+          reorderLevel: parsedReorderLevel,
+        });
       }
 
       const data = await getInventoryItemsWithAvailable();
@@ -83,7 +132,11 @@ function InventoryPage() {
       });
     } catch (err) {
       console.error(err);
-      setError("No se pudo agregar el producto al inventario.");
+      setError(
+        editingSku
+          ? "No se pudo actualizar el producto."
+          : "No se pudo agregar el producto al inventario."
+      );
     } finally {
       setSaving(false);
     }
@@ -159,7 +212,8 @@ function InventoryPage() {
                       onChange={handleChange}
                       placeholder="SKU"
                       required
-                      className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                      disabled={Boolean(editingSku)}
+                      className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                     />
 
                     <input

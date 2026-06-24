@@ -1,3 +1,5 @@
+import { getOrderStatusLabel } from "../utils/statusUtils";
+
 export function generateSmartRecommendations({ inventory = [], orders = [], shipments = [] }) {
   const recommendations = [];
   const today = new Date();
@@ -25,7 +27,7 @@ export function generateSmartRecommendations({ inventory = [], orders = [], ship
         priority: "Alta",
         type: "Pedidos",
         title: `Revisar ${order.orderNumber}`,
-        message: `El pedido está en estado ${order.status}.`,
+        message: `El pedido está en estado ${getOrderStatusLabel(order.status)}.`,
         action: order.reason || "Validar stock, inventario o servicio de envíos.",
       });
     }
