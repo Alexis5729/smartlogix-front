@@ -72,6 +72,8 @@ function Navbar({
           {role !== "ROLE_USER" && <NavItem to="/shipments">Envíos</NavItem>}
 
           {role === "ROLE_ADMIN" && <NavItem to="/users">Usuarios</NavItem>}
+
+          {role === "ROLE_ADMIN" && <NavItem to="/discounts">Descuentos</NavItem>}
         </nav>
 
         <div className="flex items-center gap-4">

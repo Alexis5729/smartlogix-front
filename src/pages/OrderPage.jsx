@@ -5,6 +5,25 @@ import { getOrderStatusLabel } from "../utils/statusUtils";
 import Navbar from "../components/Navbar";
 import PageContainer from "../layout/PageContainer";
 
+function formatDate(value) {
+  if (!value) return "Sin fecha";
+
+  return new Intl.DateTimeFormat("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+  }).format(Number(value || 0));
+}
+
 function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
@@ -16,6 +35,7 @@ function OrdersPage() {
   const [sku, setSku] = useState("SKU-1001");
   const [quantity, setQuantity] = useState(1);
   const [unitPrice, setUnitPrice] = useState(19990);
+  const [discountCode, setDiscountCode] = useState("");
   const [editingOrderNumber, setEditingOrderNumber] = useState(null);
 
   async function loadOrders() {
@@ -90,6 +110,7 @@ function OrdersPage() {
       customerName: cleanCustomerName,
       customerEmail: cleanCustomerEmail,
       shippingAddress: cleanShippingAddress,
+      discountCode: discountCode.trim().toUpperCase() || null,
       lines: [
         {
           sku: cleanSku,
@@ -108,6 +129,7 @@ function OrdersPage() {
 
       await loadOrders();
       setEditingOrderNumber(null);
+      setDiscountCode("");
       setError("");
     } catch (err) {
       console.error(err);
@@ -129,6 +151,7 @@ function OrdersPage() {
     setCustomerName("Cliente Demo");
     setCustomerEmail("cliente@smartlogix.com");
     setShippingAddress("Av. Principal 123");
+    setDiscountCode(order.discountCode || "");
 
     if (firstLine) {
       setSku(firstLine.sku);
@@ -248,6 +271,13 @@ function OrdersPage() {
                   placeholder="Precio unitario"
                 />
 
+                <input
+                  className="bg-slate-950/80 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value)}
+                  placeholder="Código descuento opcional"
+                />
+
                 <button
                   type="submit"
                   className="rounded-xl bg-indigo-600 px-6 py-3 text-white font-bold shadow-lg hover:bg-indigo-500 transition"
@@ -273,6 +303,9 @@ function OrdersPage() {
                       <tr className="bg-slate-900/80 text-slate-300 uppercase text-sm">
                         <th className="p-4 text-left rounded-l-xl">Número</th>
                         <th className="p-4 text-left">Estado</th>
+                        <th className="p-4 text-left">SubTotal</th>
+                        <th className="p-4 text-left">Descuento</th>
+                        <th className="p-4 text-left">Código</th>
                         <th className="p-4 text-left">Total</th>
                         <th className="p-4 text-left">Tracking</th>
                         <th className="p-4 text-left">Fecha</th>
@@ -291,7 +324,27 @@ function OrdersPage() {
                             </span>
                           </td>
 
-                          <td className="p-4">${order.totalAmount}</td>
+                          <td className="p-4">
+                            {formatCurrency(order.subtotalAmount ?? order.totalAmount)}
+                          </td>
+
+                          <td className="p-4">
+                            {formatCurrency(order.discountAmount ?? 0)}
+                          </td>
+
+                          <td className="p-4">
+                            {order.discountCode ? (
+                              <span className="rounded-full bg-violet-500/20 text-violet-300 px-3 py-1 font-bold">
+                                {order.discountCode}
+                              </span>
+                            ) : (
+                              <span className="text-slate-500">—</span>
+                            )}
+                          </td>
+
+                          <td className="p-4 font-bold">
+                            {formatCurrency(order.totalAmount)}
+                          </td>
 
                           <td className="p-4">
                             {order.trackingCode ? (
@@ -303,7 +356,9 @@ function OrdersPage() {
                             )}
                           </td>
 
-                          <td className="p-4 text-slate-300">{order.createdAt}</td>
+                          <td className="p-4 text-slate-300">
+                            {formatDate(order.createdAt)}
+                          </td>
 
                           <td className="p-4">
                             <div className="flex gap-2">

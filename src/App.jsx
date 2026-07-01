@@ -6,6 +6,7 @@ import OrdersPage from "./pages/OrderPage";
 import ShipmentPage from "./pages/ShipmentsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UsersPage from "./pages/UsersPage";
+import DiscountsPage from "./pages/DiscountsPage";
 
 function App() {
   return (
@@ -40,6 +41,12 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["ROLE_ADMIN"]}>
               <UsersPage />
+            </ProtectedRoute>
+          } />
+        <Route path="/discounts"
+          element={
+            <ProtectedRoute allowedRoles={["ROLE_ADMIN"]}>
+              <DiscountsPage />
             </ProtectedRoute>
           } />
       </Routes>
